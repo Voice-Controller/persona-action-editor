@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Pencil } from 'lucide-react';
 
 const ActionEditor = () => {
   const [schema, setSchema] = useState({
@@ -21,6 +22,7 @@ const ActionEditor = () => {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [error, setError] = useState('');
+  const [editingActionName, setEditingActionName] = useState(null);
 
   const actionTypes = ['update_state', 'webhook', 'hang_up_call', 'transfer_call_to', 'send_sms', 'press_phone_keys'];
   const validators = ['email', 'date (MM/dd/yyy)', 'time (hh:mm aa)', 'datetimeiso'];
@@ -67,6 +69,25 @@ const ActionEditor = () => {
         }
       }
     }));
+  };
+
+  const renameAction = (oldName, newName) => {
+    if (newName && newName !== oldName && !schema.properties[newName]) {
+      setSchema(prevSchema => {
+        const { [oldName]: actionToRename, ...restProperties } = prevSchema.properties;
+        return {
+          ...prevSchema,
+          properties: {
+            ...restProperties,
+            [newName]: actionToRename
+          }
+        };
+      });
+      if (expandedAction === oldName) {
+        setExpandedAction(newName);
+      }
+    }
+    setEditingActionName(null);
   };
 
   const updateExample = (actionName, index, field, value) => {
@@ -395,7 +416,31 @@ const ActionEditor = () => {
             {Object.keys(schema.properties).map(actionName => (
               <Card key={actionName} className="p-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">{actionName}</h3>
+                  {editingActionName === actionName ? (
+                    <Input
+                      value={actionName}
+                      onChange={(e) => renameAction(actionName, e.target.value)}
+                      onBlur={() => setEditingActionName(null)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          renameAction(actionName, e.target.value);
+                        }
+                      }}
+                      className="w-1/2"
+                    />
+                  ) : (
+                    <h3 className="text-lg font-semibold flex items-center">
+                      {actionName}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setEditingActionName(actionName)}
+                        className="ml-2"
+                      >
+                        <Pencil size={16} />
+                      </Button>
+                    </h3>
+                  )}
                   <div className="space-x-2">
                     <Button 
                       variant="ghost" 
