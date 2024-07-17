@@ -26,7 +26,7 @@ This project is a React-based web application that provides a JSON Schema Import
 ## Installation
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/action-editor.git
+   git clone https://github.com/Voice-Controller/persona-action-editor
    cd action-editor
    ```
 
